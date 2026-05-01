@@ -119,6 +119,51 @@
   /* ==========================================================
      5. SCENARIO TOGGLE
      ========================================================== */
+  .date-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .date-banner .date-info {
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .date-banner .day-progress {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .date-banner .day-counter {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .date-banner .day-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .date-banner .day-fill {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 3px;
+    transition: width .3s;
+  }
+  .date-banner .day-fill.late { background: var(--amber); }
+  .date-banner .day-fill.end { background: var(--red); }
   .scenario-toggle {
     display: flex; align-items: center; gap: 12px;
     background: var(--surface); border: 1px solid var(--border);
@@ -436,6 +481,15 @@
       <button id="themeToggle" class="btn btn-icon" title="Toggle tema">🌙</button>
     </div>
   </header>
+
+  <!-- DATE BANNER — info hari ini & posisi di siklus bulanan -->
+  <div class="date-banner">
+    <div class="date-info">📅 <span id="todayDate">—</span></div>
+    <div class="day-progress">
+      <span class="day-counter" id="dayCounter">Hari ke- dari -</span>
+      <div class="day-bar"><div class="day-fill" id="dayFill" style="width:0%"></div></div>
+    </div>
+  </div>
 
   <!-- SCENARIO TOGGLE -->
   <div class="scenario-toggle">
@@ -873,12 +927,41 @@ function computeBalance(account, data) {
 
 function renderAll() {
   const data = loadMonth(currentMonth);
+  renderDateBanner();
   renderAccountBalances(data);
   renderDashboard(data);
   renderBudgetList(data);
   renderTransactions(data);
   renderSummary(data);
   renderScenarioInfo(data);
+}
+
+// Tampilkan tanggal & hari ini + progress siklus bulanan
+function renderDateBanner() {
+  const now = new Date();
+  const days   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const months = ['Januari','Februari','Maret','April','Mei','Juni',
+                  'Juli','Agustus','September','Oktober','November','Desember'];
+
+  const dayName = days[now.getDay()];
+  const dateNum = now.getDate();
+  const monthName = months[now.getMonth()];
+  const year = now.getFullYear();
+
+  document.getElementById('todayDate').textContent =
+    `${dayName}, ${dateNum} ${monthName} ${year}`;
+
+  // Jumlah hari di bulan ini (akurat: Feb 28/29, dll)
+  const daysInMonth = new Date(year, now.getMonth() + 1, 0).getDate();
+  document.getElementById('dayCounter').textContent =
+    `Hari ke-${dateNum} dari ${daysInMonth}`;
+
+  const pct = (dateNum / daysInMonth) * 100;
+  const fill = document.getElementById('dayFill');
+  fill.style.width = pct + '%';
+  // Warna progress: biru (awal) → kuning (>60%) → merah (>85%)
+  // Idenya: makin akhir bulan, makin "hati-hati spending"
+  fill.className = 'day-fill' + (pct > 85 ? ' end' : pct > 60 ? ' late' : '');
 }
 
 function renderScenarioInfo(data) {
