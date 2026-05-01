@@ -663,7 +663,7 @@
     <div class="form-row">
       <div class="form-group">
         <label for="incomeAmount">Nominal</label>
-        <input type="number" id="incomeAmount" class="input" value="5000000" min="0" inputmode="numeric">
+        <input type="text" id="incomeAmount" class="input" value="5.000.000" inputmode="numeric">
       </div>
       <div class="form-group">
         <label for="incomeAccount">Akun penerima</label>
@@ -706,7 +706,7 @@
     </div>
     <div class="form-group">
       <label for="expenseAmount">Nominal</label>
-      <input type="number" id="expenseAmount" class="input" min="0" placeholder="15000" inputmode="numeric">
+      <input type="text" id="expenseAmount" class="input" placeholder="15.000" inputmode="numeric">
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" data-close-modal>Batal</button>
@@ -740,7 +740,7 @@
       </div>
       <div class="form-group">
         <label for="transferAmount">Nominal</label>
-        <input type="number" id="transferAmount" class="input" min="0" placeholder="200000" inputmode="numeric">
+        <input type="text" id="transferAmount" class="input" placeholder="200.000" inputmode="numeric">
       </div>
     </div>
     <div class="form-group">
@@ -898,6 +898,28 @@ function todayISO() { return new Date().toISOString().slice(0, 10); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 function classifyCategory(cat) {
   return NEEDS_CATEGORIES.includes(cat) ? 'needs' : 'wants';
+}
+
+// Format input nominal: "10000" → "10.000" (live formatting saat user ngetik)
+function formatRupiahInput(rawValue) {
+  const digits = String(rawValue).replace(/\D/g, '');  // hapus non-digit
+  if (!digits) return '';
+  return parseInt(digits, 10).toLocaleString('id-ID');  // pakai locale Indonesia
+}
+
+// Parse balik ke integer untuk disimpan: "10.000" → 10000
+function parseRupiahInput(formattedValue) {
+  const digits = String(formattedValue).replace(/\D/g, '');
+  return parseInt(digits, 10) || 0;
+}
+
+// Auto-format saat user ngetik di input nominal
+function attachRupiahFormatter(inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    el.value = formatRupiahInput(el.value);
+  });
 }
 
 /* =============================================================
@@ -1326,14 +1348,14 @@ function populateDropdowns() {
 
 function openIncomeModal() {
   document.getElementById('incomeModal').classList.add('open');
-  document.getElementById('incomeAmount').value = 5000000;
+  document.getElementById('incomeAmount').value = formatRupiahInput('5000000');
   document.getElementById('incomeDate').value = todayISO();
   document.getElementById('incomeAccount').value = DEFAULT_INCOME_ACCOUNT;
   updateIncomeBreakdown();
 }
 
 function updateIncomeBreakdown() {
-  const amount = parseInt(document.getElementById('incomeAmount').value) || 0;
+  const amount = parseRupiahInput(document.getElementById('incomeAmount').value);
   const data = loadMonth(currentMonth);
   const deductions = getDeductions(data.settings.withBoxing);
   const ratio = amount / 5000000;
@@ -1365,7 +1387,7 @@ function updateIncomeBreakdown() {
 }
 
 function saveIncome() {
-  const amount = parseInt(document.getElementById('incomeAmount').value) || 0;
+  const amount = parseRupiahInput(document.getElementById('incomeAmount').value);
   const date = document.getElementById('incomeDate').value || todayISO();
   const account = document.getElementById('incomeAccount').value;
   if (amount <= 0) { alert('Nominal harus lebih dari 0'); return; }
@@ -1412,7 +1434,7 @@ function saveExpense() {
   const category = document.getElementById('expenseCategory').value;
   const account = document.getElementById('expenseAccount').value;
   const description = document.getElementById('expenseDesc').value.trim();
-  const amount = parseInt(document.getElementById('expenseAmount').value) || 0;
+  const amount = parseRupiahInput(document.getElementById('expenseAmount').value);
 
   if (amount <= 0) { alert('Nominal harus lebih dari 0'); return; }
 
@@ -1442,7 +1464,7 @@ function saveTransfer() {
   const fromAccount = document.getElementById('transferFrom').value;
   const toAccount = document.getElementById('transferTo').value;
   const date = document.getElementById('transferDate').value || todayISO();
-  const amount = parseInt(document.getElementById('transferAmount').value) || 0;
+  const amount = parseRupiahInput(document.getElementById('transferAmount').value);
   const description = document.getElementById('transferDesc').value.trim();
 
   if (amount <= 0) { alert('Nominal harus lebih dari 0'); return; }
@@ -1614,6 +1636,11 @@ document.getElementById('btnExport').addEventListener('click', exportCSV);
 initTheme();
 populateDropdowns();
 renderAll();
+
+// Auto-format input nominal pakai separator titik (10000 → 10.000)
+attachRupiahFormatter('incomeAmount');
+attachRupiahFormatter('expenseAmount');
+attachRupiahFormatter('transferAmount');
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeAllModals();
