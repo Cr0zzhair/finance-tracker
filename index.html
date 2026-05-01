@@ -4,6 +4,28 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Finance Tracker — Personal</title>
+
+<!-- ============================================================
+     ICON INLINE — gak perlu file terpisah!
+     Pakai SVG di-encode ke data URI. Browser support semua tag ini.
+     ============================================================ -->
+
+<!-- Favicon (tab browser) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D9E75'/><text x='50' y='62' font-size='52' text-anchor='middle' fill='white' font-family='-apple-system,system-ui,sans-serif' font-weight='700'>%E2%82%A3</text></svg>" />
+
+<!-- Apple Touch Icon (iOS Add to Home Screen) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231D9E75'/><text x='90' y='112' font-size='95' text-anchor='middle' fill='white' font-family='-apple-system,system-ui,sans-serif' font-weight='700'>%E2%82%A3</text></svg>" />
+
+<!-- Theme color (warna address bar di HP) -->
+<meta name="theme-color" content="#1D9E75" />
+
+<!-- PWA basics (Add to Home Screen di Android) -->
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Finance" />
+
+<!-- Web App Manifest inline (pakai data URI juga!) -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"Finance Tracker","short_name":"Finance","start_url":"./","display":"standalone","background_color":"%23F7F7F5","theme_color":"%231D9E75","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27><rect width=%27192%27 height=%27192%27 rx=%2742%27 fill=%27%231D9E75%27/><text x=%2796%27 y=%27120%27 font-size=%27100%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27-apple-system,system-ui,sans-serif%27 font-weight=%27700%27>%E2%82%A3</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}' />
 <style>
   /* ==========================================================
      1. CSS VARIABLES (Design Tokens)
