@@ -834,23 +834,31 @@ function classifyCategory(cat) {
 function computeBalance(account, data) {
   let balance = 0;
 
-  // (+) Income masuk ke akun ini
+  // (+) Income masuk ke akun penerima
   data.income.forEach(i => {
     if (i.account === account) balance += i.amount;
   });
-  // (–) Auto-deduction dari akun ini
+
+  // Auto-split = VIRTUAL TRANSFER dari income.account → breakdown.account
+  // Kalau akunnya sama: no-op (uang tetap di sana, cuma 'earmarked' untuk pos tertentu).
+  // Kalau beda akun: pindahkan uang seperti transfer biasa.
+  // Pattern ini namanya "envelope budgeting" — uang dialokasikan ke pos2,
+  // tapi belum tentu sudah dibayar. Bayar = expense terpisah nanti.
   data.income.forEach(i => {
-    if (i.breakdown) {
-      i.breakdown.forEach(b => {
-        if (b.account === account) balance -= b.amount;
-      });
-    }
+    if (!i.breakdown) return;
+    i.breakdown.forEach(b => {
+      if (b.account === i.account) return; // akun sama, gak perlu transfer
+      if (i.account === account) balance -= b.amount; // keluar dari sumber
+      if (b.account === account) balance += b.amount; // masuk ke tujuan
+    });
   });
-  // (–) Expense dari akun ini
+
+  // (–) Expense dari akun ini (ini baru pengeluaran beneran)
   data.expenses.forEach(e => {
     if (e.account === account) balance -= e.amount;
   });
-  // Transfer
+
+  // Transfer manual antar akun
   data.transfers.forEach(t => {
     if (t.toAccount === account)   balance += t.amount;
     if (t.fromAccount === account) balance -= t.amount;
